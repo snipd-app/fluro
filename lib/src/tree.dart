@@ -16,11 +16,11 @@ enum RouteTreeNodeType {
   parameter,
 }
 
-/// A matched [AppRoute]
+/// A matched [FluroRoute]
 class AppRouteMatch {
   AppRouteMatch(this.route);
 
-  AppRoute route;
+  FluroRoute route;
   Map<String, List<String>> parameters = <String, List<String>>{};
 }
 
@@ -28,16 +28,16 @@ class AppRouteMatch {
 class RouteTreeNodeMatch {
   RouteTreeNodeMatch(this.node);
 
-  RouteTreeNode node;
-
-  var parameters = <String, List<String>>{};
-
   RouteTreeNodeMatch.fromMatch(RouteTreeNodeMatch? match, this.node) {
     parameters = <String, List<String>>{};
     if (match != null) {
       parameters.addAll(match.parameters);
     }
   }
+
+  RouteTreeNode node;
+
+  var parameters = <String, List<String>>{};
 }
 
 /// A node on [RouteTree]
@@ -49,7 +49,7 @@ class RouteTreeNode {
 
   RouteTreeNode? parent;
 
-  var routes = <AppRoute>[];
+  var routes = <FluroRoute>[];
   var nodes = <RouteTreeNode>[];
 
   bool isParameter() {
@@ -63,24 +63,24 @@ class RouteTree {
   bool _hasDefaultRoute = false;
 
   /// Add a route to the route tree
-  void addRoute(AppRoute route) {
+  void addRoute(FluroRoute route) {
     String path = route.route;
     // is root/default route, just add it
     if (path == Navigator.defaultRouteName) {
       if (_hasDefaultRoute) {
         // throw an error because the internal consistency of the router
         // could be affected
-        throw ("Default route was already defined");
+        throw 'Default route was already defined';
       }
 
-      var node = RouteTreeNode(path, RouteTreeNodeType.component);
+      final node = RouteTreeNode(path, RouteTreeNodeType.component);
       node.routes = [route];
       _nodes.add(node);
       _hasDefaultRoute = true;
       return;
     }
 
-    if (path.startsWith("/")) {
+    if (path.startsWith('/')) {
       path = path.substring(1);
     }
 
@@ -89,11 +89,11 @@ class RouteTree {
     RouteTreeNode? parent;
 
     for (int i = 0; i < pathComponents.length; i++) {
-      String? component = pathComponents[i];
+      final component = pathComponents[i];
       RouteTreeNode? node = _nodeForComponent(component, parent);
 
       if (node == null) {
-        RouteTreeNodeType type = _typeForComponent(component);
+        final RouteTreeNodeType type = _typeForComponent(component);
         node = RouteTreeNode(component, type);
         node.parent = parent;
 
@@ -115,14 +115,14 @@ class RouteTree {
   AppRouteMatch? matchRoute(String path) {
     var usePath = path;
 
-    if (usePath.startsWith("/")) {
+    if (usePath.startsWith('/')) {
       usePath = path.substring(1);
     }
 
-    var components = usePath.split("/");
+    var components = usePath.split('/');
 
     if (path == Navigator.defaultRouteName) {
-      components = ["/"];
+      components = ['/'];
     }
 
     var nodeMatches = <RouteTreeNode, RouteTreeNodeMatch>{};
@@ -135,17 +135,17 @@ class RouteTree {
       var pathPart = checkComponent;
       Map<String, List<String>>? queryMap;
 
-      if (checkComponent.contains("?")) {
-        var splitParam = checkComponent.split("?");
+      if (checkComponent.contains('?')) {
+        final splitParam = checkComponent.split('?');
         pathPart = splitParam[0];
         queryMap = parseQueryString(splitParam[1]);
       }
 
       for (final node in nodesToCheck) {
-        final isMatch = (node.part == pathPart || node.isParameter());
+        final isMatch = node.part == pathPart || node.isParameter();
 
         if (isMatch) {
-          RouteTreeNodeMatch? parentMatch = nodeMatches[node.parent];
+          final parentMatch = nodeMatches[node.parent];
           final match = RouteTreeNodeMatch.fromMatch(parentMatch, node);
           if (node.isParameter()) {
             final paramKey = node.part.substring(1);
@@ -162,7 +162,7 @@ class RouteTree {
       nodeMatches = currentMatches;
       nodesToCheck = nextNodes;
 
-      if (currentMatches.values.length == 0) {
+      if (currentMatches.values.isEmpty) {
         return null;
       }
     }
@@ -192,13 +192,13 @@ class RouteTree {
     final nodes = parent != null ? parent.nodes : _nodes;
 
     for (final node in nodes) {
-      var indent = "";
+      var indent = '';
 
       for (var i = 0; i < level; i++) {
-        indent += "    ";
+        indent += '    ';
       }
 
-      print("$indent${node.part}: total routes=${node.routes.length}");
+      print('$indent${node.part}: total routes=${node.routes.length}');
 
       if (node.nodes.isNotEmpty) {
         _printSubTree(parent: node, level: level + 1);
@@ -235,18 +235,20 @@ class RouteTree {
 
   /// Is the path component a parameter
   bool _isParameterComponent(String component) {
-    return component.startsWith(":");
+    return component.startsWith(':');
   }
 
   Map<String, List<String>> parseQueryString(String query) {
     final search = RegExp('([^&=]+)=?([^&]*)');
-    final params = Map<String, List<String>>();
+    final params = <String, List<String>>{};
 
-    if (query.startsWith('?')) query = query.substring(1);
+    if (query.startsWith('?')) {
+      query = query.substring(1);
+    }
 
-    decode(String s) => Uri.decodeComponent(s.replaceAll('+', ' '));
+    String decode(String s) => Uri.decodeComponent(s.replaceAll('+', ' '));
 
-    for (Match match in search.allMatches(query)) {
+    for (final match in search.allMatches(query)) {
       final key = decode(match.group(1)!);
       final value = decode(match.group(2)!);
 
