@@ -17,9 +17,17 @@ typedef PageBuilder = Widget Function(
   Map<String, List<String>> parameters,
 );
 
-abstract class FluroRoute {
-  FluroRoute(this.route, {required this.pageBuilder});
+typedef RedirectResolver = String Function(
+    Map<String, List<String>> parameters);
+
+sealed class FluroRoute {
+  FluroRoute(this.route);
+
   final String route;
+}
+
+abstract class FluroDestinationRoute extends FluroRoute {
+  FluroDestinationRoute(super.route, {required this.pageBuilder});
   final PageBuilder pageBuilder;
 
   Route routeBuilder({
@@ -29,6 +37,12 @@ abstract class FluroRoute {
     bool? opaque,
     required Map<String, List<String>> parameters,
   });
+}
+
+class FluroRedirectRoute extends FluroRoute {
+  FluroRedirectRoute(super.route, {required this.resolver});
+
+  final RedirectResolver resolver;
 }
 
 /// The type of transition to use when pushing/popping a route.

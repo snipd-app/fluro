@@ -32,12 +32,12 @@ class FluroRouter {
   final _routeTree = RouteTree();
 
   /// Generic handler for when a route has not been defined
-  FluroRoute notFoundRoute;
+  FluroDestinationRoute notFoundRoute;
 
   /// The default transition duration to use throughout Fluro
   static const defaultTransitionDuration = Duration(milliseconds: 250);
 
-  /// Finds a defined [FluroRoute] for the path value. If no [FluroRoute] definition was found
+  /// Finds a defined [FluroDestinationRoute] for the path value. If no [FluroDestinationRoute] definition was found
   /// then function will return null.
   AppRouteMatch? match(String path) {
     return _routeTree.matchRoute(path);

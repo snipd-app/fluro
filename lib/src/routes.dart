@@ -46,7 +46,7 @@ RouteTransitionsBuilder _standardTransitionsBuilder(
 }
 
 /// A route that is added to the router tree.
-class FluroDefaultRoute extends FluroRoute {
+class FluroDefaultRoute extends FluroDestinationRoute {
   FluroDefaultRoute(
     String route, {
     required super.pageBuilder,

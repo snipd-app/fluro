@@ -16,12 +16,12 @@ enum RouteTreeNodeType {
   parameter,
 }
 
-/// A matched [FluroRoute]
+/// A matched [FluroDestinationRoute]
 class AppRouteMatch {
-  AppRouteMatch(this.route);
+  AppRouteMatch(this.route, this.parameters);
 
-  FluroRoute route;
-  Map<String, List<String>> parameters = <String, List<String>>{};
+  final FluroDestinationRoute route;
+  final Map<String, List<String>> parameters;
 }
 
 /// A matched [RouteTreeNode]
@@ -173,11 +173,14 @@ class RouteTree {
       final match = matches.first;
       final nodeToUse = match.node;
       final routes = nodeToUse.routes;
+      final parameters = match.parameters;
 
       if (routes.isNotEmpty) {
-        final routeMatch = AppRouteMatch(routes[0]);
-        routeMatch.parameters = match.parameters;
-        return routeMatch;
+        final route = routes[0];
+        return switch (route) {
+          FluroDestinationRoute() => AppRouteMatch(route, parameters),
+          FluroRedirectRoute() => matchRoute(route.resolver(parameters)),
+        };
       }
     }
 
